@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
+#include <iostream>
+#include <chrono>
 
 // CUDA runtime
 #include <cuda_runtime.h>
@@ -160,16 +162,23 @@ int MatrixMultiply(int argc, char **argv,
     // Copy result from device to host
     cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
 
-    printf("Checking computed result for correctness: ");
     bool correct = true;
 
 
+    auto t1 = std::chrono::high_resolution_clock::now();
     for(int i = 0; i < dimsA.x; ++i)
         for(int j = 0; j < dimsA.y; ++j)
             for(int k = 0; k < dimsA.x; ++k)
             {
                 h_C_test[j + i * dimsA.x] += h_A[i * dimsA.x + k] * h_B[k* dimsA.x +j];
             }
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+    std::cout <<  duration;
+
+    printf("Checking computed result for correctness: ");
 
     // test relative error by the formula
     //     |<x, y>_cpu - <x,y>_gpu|/<|x|, |y|>  < eps
@@ -211,8 +220,8 @@ int main(int argc, char **argv) {
 
     int block_size = 32;
 
-    dim3 dimsA(10 * block_size, 10 * block_size, 1);
-    dim3 dimsB(10 * block_size, 10 * block_size, 1);
+    dim3 dimsA(50 * block_size, 50 * block_size, 1);
+    dim3 dimsB(50 * block_size, 50 * block_size, 1);
 
 
     printf("MatrixA(%d,%d), MatrixB(%d,%d)\n", dimsA.x, dimsA.y,
