@@ -95,6 +95,15 @@ int MatrixMultiply(int argc, char **argv,
         exit(EXIT_FAILURE);
     }
 
+    cudaEvent_t start;
+    cudaEventCreate(&start);
+
+    cudaEvent_t stop;
+    cudaEventCreate(&stop);
+
+    // Record the start event
+    cudaEventRecord(start, NULL);
+
     cudaMalloc(&d_A, mem_size_A);
 
     cudaMalloc(&d_B, mem_size_B);
@@ -118,24 +127,8 @@ int MatrixMultiply(int argc, char **argv,
 
     cudaDeviceSynchronize();
 
-    // Allocate CUDA events that we'll use for timing
-    cudaEvent_t start;
-    cudaEventCreate(&start);
-
-    cudaEvent_t stop;
-    cudaEventCreate(&stop);
-
-    // Record the start event
-    cudaEventRecord(start, NULL);
-
-
-    if (block_size == 16) {
-        MatrixMulCUDA<16> <<< grid, threads >>>(d_C, d_A, d_B,
+    MatrixMulCUDA<32> <<< grid, threads >>>(d_C, d_A, d_B,
                                                     dimsA.x, dimsB.x);
-    } else {
-        MatrixMulCUDA<32> <<< grid, threads >>>(d_C, d_A, d_B,
-                                                    dimsA.x, dimsB.x);
-    }
 
 
     // Record the stop event
@@ -220,8 +213,8 @@ int main(int argc, char **argv) {
 
     int block_size = 32;
 
-    dim3 dimsA(50 * block_size, 50 * block_size, 1);
-    dim3 dimsB(50 * block_size, 50 * block_size, 1);
+    dim3 dimsA(10 * block_size, 10 * block_size, 1);
+    dim3 dimsB(10 * block_size, 10 * block_size, 1);
 
 
     printf("MatrixA(%d,%d), MatrixB(%d,%d)\n", dimsA.x, dimsA.y,
