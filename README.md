@@ -7,7 +7,7 @@ Note: you need to have compatible GPU, [list](https://developer.nvidia.com/cuda-
 
 # Results
 
-The results were tested on GeForce gt730.
+The results were tested on GeForce 840M.
 
 | Matrix size   | CPU, ms       | GPU, ms|
 | ------------- |:-------------:| -----: |
