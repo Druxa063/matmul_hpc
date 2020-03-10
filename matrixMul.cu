@@ -147,7 +147,7 @@ int MatrixMultiply(int argc, char **argv,
 
 
     printf(
-        "Time= %.3f msec," \
+        "Time spent executing by the GPU = %.3f msec," \
         " WorkgroupSize= %u threads/block\n",
         msecPerMatrixMul,
         threads.x * threads.y);
@@ -157,8 +157,7 @@ int MatrixMultiply(int argc, char **argv,
 
     bool correct = true;
 
-
-    auto t1 = std::chrono::high_resolution_clock::now();
+    unsigned int cpu_start = clock();
     for(int i = 0; i < dimsA.x; ++i)
         for(int j = 0; j < dimsA.y; ++j)
             for(int k = 0; k < dimsA.x; ++k)
@@ -166,10 +165,9 @@ int MatrixMultiply(int argc, char **argv,
                 h_C_test[j + i * dimsA.x] += h_A[i * dimsA.x + k] * h_B[k* dimsA.x +j];
             }
 
-    auto t2 = std::chrono::high_resolution_clock::now();
-
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-    std::cout <<  duration;
+    unsigned int cpu_end = clock();
+    double cpuTime = (double)(cpu_end - cpu_start);
+    printf("Time spent executing by the CPU: %.3f msec\n", cpuTime);
 
     printf("Checking computed result for correctness: ");
 
